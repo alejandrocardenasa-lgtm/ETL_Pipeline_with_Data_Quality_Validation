@@ -1,6 +1,5 @@
 import pandas as pd
 import great_expectations as gx
-import re
 
 # Cargamos el dataset
 def extract_data():
@@ -21,42 +20,26 @@ def detect_date_format(value):
     if value in ["", "NULL", "N/A", "NA", "null", "n/a"]:
         return "null_like"
 
-    # Formato YYYY-MM-DD
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
-        return "YYYY-MM-DD"
-
-    # Formato YYYY/MM/DD
-    if re.fullmatch(r"\d{4}/\d{2}/\d{2}", value):
-        return "YYYY/MM/DD"
-
-    # Formato DD-MM-YYYY
-    if re.fullmatch(r"\d{2}-\d{2}-\d{4}", value):
-        return "DD-MM-YYYY"
+    # Intentar formatos conocidos
+    for fmt, name in [
+        ("%Y-%m-%d", "YYYY-MM-DD"),
+        ("%Y/%m/%d", "YYYY/MM/DD"),
+        ("%d-%m-%Y", "DD-MM-YYYY"),
+    ]:
+        try:
+            pd.to_datetime(value, format=fmt)
+            return name
+        except:
+            continue
 
     # Cualquier otro formato
     return "other"
 
-# Funcion para parsear fechas mixtas 
-# Convierte fechas que vienen en formatos diferentes a un formato fecha real (datetime)
-def parse_mixed_date(value):
-    if pd.isna(value):
-        return pd.NaT
-
-    value = str(value).strip()
-
-    if value in ["", "NULL", "N/A", "NA", "null", "n/a"]:
-        return pd.NaT
-
-    if re.fullmatch(r"\d{4}-\d{2}-\d{2}", value):
-        return pd.to_datetime(value, format="%Y-%m-%d", errors="coerce")
-
-    if re.fullmatch(r"\d{4}/\d{2}/\d{2}", value):
-        return pd.to_datetime(value, format="%Y/%m/%d", errors="coerce")
-
-    if re.fullmatch(r"\d{2}-\d{2}-\d{4}", value):
-        return pd.to_datetime(value, format="%d-%m-%Y", errors="coerce")
-
-    return pd.NaT
+# Future dates
+def count_future_dates(date_series):
+    parsed_dates = pd.to_datetime(date_series, errors="coerce")
+    future_dates_count = (parsed_dates > pd.Timestamp("2023-12-31")).sum()
+    return future_dates_count
 
 # Profiling basico
 def basic_profiling(df):
@@ -90,6 +73,22 @@ def basic_profiling(df):
     print("\n- CARDINALITY: COUNTRY -")
     print(df["country"].nunique())
 
+    # [x] product value counts
+    print("\n- PRODUCT VALUE COUNTS -")
+    print(df["product"].value_counts())
+
+    # [x] country value counts
+    print("\n- COUNTRY VALUE COUNTS -")
+    print(df["country"].value_counts())
+
+    # [x] product unique values
+    print("\n- PRODUCT UNIQUE VALUES -")
+    print(df["product"].unique())
+
+    # [x] country unique values
+    print("\n- COUNTRY UNIQUE VALUES -")
+    print(df["country"].unique())
+
     # [x] numeric stats
     print("\n- NUMERIC STATS -")
     numeric_stats = df[["quantity", "price", "total_revenue"]].agg(
@@ -113,18 +112,24 @@ def basic_profiling(df):
     print("\n- DATE FORMAT DISTRIBUTION -")
     print(df["date_format"].value_counts())
 
-    # Parsear fechas para revisar futuras
-    df["invoice_date_parsed"] = df["invoice_date"].apply(parse_mixed_date)
-
-    # [x] future dates
-    future_dates_count = (df["invoice_date_parsed"] > pd.Timestamp("2023-12-31")).sum()
-    print("\n- FUTURE DATES (> 2023-12-31) -")
-    print(future_dates_count)
-
     # [x] null-like dates
     null_like_count = (df["date_format"] == "null_like").sum()
     print("\n- NULL-LIKE DATE STRINGS -")
     print(null_like_count)
+
+    # [x] invalid / other date formats
+    other_format_count = (df["date_format"] == "other").sum()
+    print("\n- OTHER / INVALID DATE FORMATS -")
+    print(other_format_count)
+
+    # Future dates
+    future_dates_count = count_future_dates(df["invoice_date"])
+    print("\n- FUTURE DATES (> 2023-12-31) -")
+    print(future_dates_count)
+
+    # [x] sample invalid date values
+    print("\n- SAMPLE INVALID DATE VALUES -")
+    print(df[df["date_format"] == "other"]["invoice_date"].head())
 
 # Registramos en great expectations
 def register_in_ge(df):
