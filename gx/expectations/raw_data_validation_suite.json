@@ -17,9 +17,12 @@
       "meta": {}
     },
     {
-      "expectation_type": "expect_column_values_to_be_unique",
+      "expectation_type": "expect_compound_columns_to_be_unique",
       "kwargs": {
-        "column": "invoice_id"
+        "column_list": [
+          "invoice_id",
+          "product"
+        ]
       },
       "meta": {}
     },
@@ -63,8 +66,8 @@
         "value_set": [
           "Colombia",
           "Ecuador",
-          "Chile",
-          "Peru"
+          "Peru",
+          "Chile"
         ]
       },
       "meta": {}
@@ -91,6 +94,49 @@
       "kwargs": {
         "column_A": "total_revenue",
         "column_B": "expected_revenue"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "month"
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "month",
+        "max_value": 12,
+        "min_value": 1
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "revenue_bin",
+        "value_set": [
+          "Low",
+          "Medium",
+          "High"
+        ]
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "total_revenue",
+        "min_value": 1e-06
+      },
+      "meta": {}
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "invoice_id"
       },
       "meta": {}
     }

@@ -81,7 +81,9 @@ def run_input_validation(context, batch_request, df):
     validator.expect_column_values_to_not_be_null("invoice_date")
 
     # Uniqueness
-    validator.expect_column_values_to_be_unique("invoice_id")
+    validator.expect_compound_columns_to_be_unique(
+    column_list=["invoice_id", "product"]
+    )
 
     # Validity
     validator.expect_column_values_to_be_between(
@@ -189,5 +191,14 @@ def run_input_validation(context, batch_request, df):
 
     plt.savefig("failure_rate_summary.pdf", bbox_inches="tight")
     plt.close()
+
+    # DQ Score RAW
+    total_expectations = validation_results["statistics"]["evaluated_expectations"]
+    successful_expectations = validation_results["statistics"]["successful_expectations"]
+
+    dq_raw = successful_expectations / total_expectations
+
+    with open("dq_raw.txt", "w") as f:
+        f.write(str(dq_raw))
 
     return validation_results, wrong_revenue

@@ -1,43 +1,71 @@
 import pandas as pd
+import numpy as np
 
 def clean_data(df):
-    print("\n--- INICIANDO LIMPIEZA DE DATOS (TASK D) ---")
-    
-    # Trabajamos sobre una copia para no alterar el original
+    print("\n- INICIANDO LIMPIEZA DE DATOS -")
+
+    # Trabajamos sobre una copia
     df_clean = df.copy()
 
-    # UNICIDAD: Eliminar duplicados basados en el invoice_id
-    df_clean = df_clean.drop_duplicates(subset=['invoice_id'], keep='first')
+    # Normalizamos product
+    df_clean["product"] = df_clean["product"].str.strip().str.title()
 
-    # COMPLETITUD: Eliminar filas donde customer_id o invoice_date son nulos
-    df_clean = df_clean.dropna(subset=['customer_id', 'invoice_date'])
+    # Estandarizamos country con diccionario
+    country_map = {
+        "ecuador": "Ecuador",
+        "colombia": "Colombia",
+        "CO": "Colombia"
+    }
 
-    # VALIDEZ: Arreglar cantidades y precios
-    # Convertimos a valor absoluto para quitar los negativos
-    df_clean['quantity'] = df_clean['quantity'].abs()
-    df_clean['price'] = df_clean['price'].abs()
-    # Filtramos para asegurarnos de que no queden ceros
-    df_clean = df_clean[(df_clean['quantity'] >= 1) & (df_clean['price'] >= 0.01)]
+    df_clean["country"] = df_clean["country"].str.strip()
+    df_clean["country"] = df_clean["country"].replace(country_map)
+    df_clean["country"] = df_clean["country"].str.title()
 
-    # CONSISTENCIA: Estandarizar nombres de países
-    # Convertimos todo a minúsculas y luego la primera letra en mayúscula (ej. 'ecuador' -> 'Ecuador')
-    df_clean['country'] = df_clean['country'].str.title()
-    # Reemplazamos abreviaturas
-    country_map = {'Co': 'Colombia', 'Pe': 'Peru', 'Ec': 'Ecuador', 'Cl': 'Chile'}
-    df_clean['country'] = df_clean['country'].replace(country_map)
+    # Llenamos customer_id nulos con IDs nuevos
+    max_id = df_clean["customer_id"].max()
 
-    # PUNTUALIDAD/FORMATO: Arreglar fechas
-    # Convertimos todas las fechas mezcladas a un objeto datetime real de pandas
-    df_clean['invoice_date'] = pd.to_datetime(df_clean['invoice_date'], format="mixed", errors='coerce')
-    # Filtramos fechas en el futuro (mayores a 2023-12-31)
-    df_clean = df_clean[df_clean['invoice_date'] <= pd.Timestamp('2023-12-31')]
-    # Volvemos a convertir al texto estricto YYYY-MM-DD que pide Great Expectations
-    df_clean['invoice_date'] = df_clean['invoice_date'].dt.strftime('%Y-%m-%d')
+    if pd.isna(max_id):
+        max_id = 100000
 
-    # CONSISTENCIA LÓGICA: Recalcular el total_revenue
-    df_clean['total_revenue'] = df_clean['quantity'] * df_clean['price']
+    missing_mask = df_clean["customer_id"].isnull()
+    num_missing = missing_mask.sum()
+
+    if num_missing > 0:
+        new_ids = np.arange(int(max_id) + 1, int(max_id) + 1 + num_missing)
+        df_clean.loc[missing_mask, "customer_id"] = new_ids
+
+    # Convertir a Int64
+    df_clean["customer_id"] = df_clean["customer_id"].astype("Int64")
+
+    # Arreglamos cantidades y precios
+    df_clean = df_clean[df_clean["price"] >= 0.01]
+    df_clean = df_clean[df_clean["quantity"] >= 1]
+
+    # Parsear fechas
+    df_clean["invoice_date"] = pd.to_datetime(
+        df_clean["invoice_date"],
+        format="mixed",
+        errors="coerce",
+        dayfirst=True
+    )
+
+    # Rellenar fechas nulas
+    df_clean["invoice_date"] = df_clean["invoice_date"].ffill().bfill()
+
+    # Corregir fechas futuras
+    max_valid_date = pd.Timestamp("2023-12-31")
+    df_clean.loc[df_clean["invoice_date"] > max_valid_date, "invoice_date"] = max_valid_date
+
+    # Recalcular total_revenue
+    df_clean["total_revenue"] = df_clean["quantity"] * df_clean["price"]
+
+    # Eliminar duplicados exactos
+    df_clean = df_clean.drop_duplicates()
+
+    # Eliminar duplicados lógicos por factura + producto
+    df_clean = df_clean.drop_duplicates(subset=["invoice_id", "product"], keep="first")
 
     print(f"Filas originales: {len(df)}")
-    print(f"Filas después de la limpieza: {len(df_clean)}")
-    
+    print(f"Filas despues de limpieza: {len(df_clean)}")
+
     return df_clean

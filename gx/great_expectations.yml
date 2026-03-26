@@ -103,6 +103,12 @@ fluent_datasources:
       retail_asset:
         type: dataframe
         batch_metadata: {}
+  output_datasource:
+    type: pandas
+    assets:
+      output_asset:
+        type: dataframe
+        batch_metadata: {}
 notebooks:
 include_rendered_content:
   globally: false

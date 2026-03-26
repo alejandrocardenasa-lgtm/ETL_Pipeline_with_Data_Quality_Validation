@@ -2,7 +2,7 @@ from extract import extract_data, register_in_ge, basic_profiling
 from validate_input import run_input_validation
 from clean import clean_data
 from transform import transform_data
-from load import load_data
+from validate_output import run_output_validation
 
 def main():
     # Extract
@@ -22,14 +22,24 @@ def main():
         batch_request,
         df
     )
+    print("\nInput validation completed.")
 
-    # cleaning
+    # Cleaning
     df_cleaned = clean_data(df)
+    print("\nCleaning completed.")
 
-    #Transformation
+    # Transformation
     df_transformed = transform_data(df_cleaned)
+    print("\nTransformation completed.")
 
-    load_data(df_transformed)
+    # Output validation
+    output_results = run_output_validation(context)
+    print("\nOutput validation completed.")
+
+    if output_results["success"]:
+        print("\nPipeline completed successfully.")
+    else:
+        print("\nPipeline finished, but output validation failed.")
 
 if __name__ == "__main__":
     main()

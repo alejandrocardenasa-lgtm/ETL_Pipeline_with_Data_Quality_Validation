@@ -1,16 +1,18 @@
+# Virtual environment
 .venv/
+venv/
+env/
+
+# Python cache
 __pycache__/
 *.pyc
+
+# OS
 .DS_Store
 
-Data/clean/
-*.db
-*.sqlite
-*.sqlite3
-
-great_expectations/uncommitted/data_docs/
-great_expectations/uncommitted/validations/
-great_expectations/uncommitted/checkpoints/
-great_expectations/.ipynb_checkpoints/
-
+# Environment 
 .env
+
+# Great Expectations generated temporary artifacts
+gx/uncommitted/
+great_expectations/uncommitted/
