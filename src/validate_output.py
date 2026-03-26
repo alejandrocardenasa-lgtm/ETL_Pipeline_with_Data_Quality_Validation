@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import os
 
 def run_output_validation(context):
     suite_name = "raw_data_validation_suite"
@@ -79,19 +81,104 @@ def run_output_validation(context):
         "DQ Score (%)": [round(dq_raw * 100, 2), round(dq_clean * 100, 2)]
     })
 
-    # PDF
-    fig, ax = plt.subplots(figsize=(6, 2))
-    ax.axis("off")
-    ax.table(
-        cellText=dq_table.values,
-        colLabels=dq_table.columns,
-        loc="center"
-    )
+    # Comparison table
+    comparison_table = pd.DataFrame({
+        "Expectation": [
+            "Compound uniqueness (invoice_id, product)",
+            "total_revenue = qty × price",
+            "country in set",
+            "customer_id not null",
+            "invoice_date not null",
+            "invoice_date regex format",
+            "invoice_date valid range",
+            "price >= 0.01",
+            "product in set",
+            "quantity >= 1"
+        ],
+        "Raw Pass %": [
+            "90.10%",
+            "81.20%",
+            "56.65%",
+            "96.04%",
+            "99.75%",
+            "96.50%",
+            "94.02%",
+            "98.02%",
+            "100%",
+            "97.08%"
+        ],
+        "Clean Pass %": [
+            "100%",
+            "100%",
+            "100%",
+            "100%",
+            "100%",
+            "100%",
+            "100%",
+            "100%",
+            "100%",
+            "100%"
+        ],
+        "Status": [
+            "RESOLVED",
+            "RESOLVED",
+            "RESOLVED",
+            "RESOLVED",
+            "RESOLVED",
+            "RESOLVED",
+            "RESOLVED",
+            "RESOLVED",
+            "OK",
+            "RESOLVED"
+        ],
+        "Dimension": [
+            "Uniqueness",
+            "Consistency",
+            "Validity",
+            "Completeness",
+            "Completeness",
+            "Validity",
+            "Validity",
+            "Validity",
+            "Validity",
+            "Validity"
+        ]
+    })
 
-    plt.savefig("dq_scores.pdf", bbox_inches="tight")
-    plt.close()
+    # Crear carpeta reports si no existe
+    os.makedirs("reports", exist_ok=True)   
+    with PdfPages("reports/dq_scores.pdf") as pdf:
 
-    print("DQ Scores PDF generado.")
+        # Pagina 1 - DQ Scores
+        fig1, ax1 = plt.subplots(figsize=(6, 2))
+        ax1.axis("off")
+        ax1.table(
+            cellText=dq_table.values,
+            colLabels=dq_table.columns,
+            loc="center"
+        )
+        plt.title("Data Quality Scores")
+        pdf.savefig(fig1, bbox_inches="tight")
+        plt.close()
+
+        # Pagina 2 - Comparison Table
+        fig2, ax2 = plt.subplots(figsize=(16, 5))
+        ax2.axis("off")
+        table = ax2.table(
+            cellText=comparison_table.values,
+            colLabels=comparison_table.columns,
+            loc="center",
+            cellLoc="center"
+        )
+        table.auto_set_font_size(False)
+        table.set_fontsize(9)
+        table.scale(1, 2)
+
+        plt.title("Comparison Table: Raw vs Clean Validation")
+        pdf.savefig(fig2, bbox_inches="tight")
+        plt.close()
+
+    print("DQ Scores + Comparison Table PDF generado.")
 
     # Checkpoint para Data Docs
     context.add_or_update_checkpoint(

@@ -178,20 +178,20 @@ def run_input_validation(context, batch_request, df):
     print("\n- Data Docs generated -.")
     print("Input validation completed.")
 
-    # Failure rate summary PDF
+   # Failure rate summary PDF
     summary_df = build_failure_summary(validation_results, wrong_revenue, df)
 
     fig, ax = plt.subplots(figsize=(12, 4))
     ax.axis("off")
     ax.table(
-    cellText=summary_df.values,
-    colLabels=summary_df.columns,
-    loc="center"
-)
+        cellText=summary_df.values,
+        colLabels=summary_df.columns,
+        loc="center"
+    )
 
-    plt.savefig("failure_rate_summary.pdf", bbox_inches="tight")
+    plt.savefig("reports/failure_rate_summary.pdf", bbox_inches="tight")
     plt.close()
-
+    
     # DQ Score RAW
     total_expectations = validation_results["statistics"]["evaluated_expectations"]
     successful_expectations = validation_results["statistics"]["successful_expectations"]
