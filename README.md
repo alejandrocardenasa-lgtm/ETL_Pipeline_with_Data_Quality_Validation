@@ -21,8 +21,8 @@ Data/
 raw/
 processed/
 
-gx/                         # Configuración de Great Expectations
-reports/                    # Reportes PDF de calidad de datos
+gx/                         
+reports/                    
 src/
 extract.py
 clean.py
