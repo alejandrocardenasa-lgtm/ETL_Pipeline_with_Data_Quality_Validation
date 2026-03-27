@@ -56,7 +56,7 @@ def main():
         run_business_analysis()
         print("Business Analysis completed. carpeta reports/")
         
-        print("\n¡Todo listo! El pipeline corrio completo.")
+        print("\nEl pipeline corrio completo.")
     else:
         print("\nPipeline finished, but output validation failed.")
 
