@@ -55,7 +55,7 @@ Se recomienda usar estas mismas versiones para evitar problemas de compatibilida
 
 ## Cómo Ejecutar el Proyecto
 
-### 1. Clonar el repositorio
+1. Clonar el repositorio
 ```bash
 git clone https://github.com/alejandrocardenasa-lgtm/ETL_Pipeline_with_Data_Quality_Validation.git
 
