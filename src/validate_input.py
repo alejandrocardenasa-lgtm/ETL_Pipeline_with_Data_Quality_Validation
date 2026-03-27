@@ -2,7 +2,7 @@ import pandas as pd
 import os
 import matplotlib.pyplot as plt
 
-  # failure rate summary table
+# tabla resumen de tasa de fallos
 def build_failure_summary(results, wrong_revenue, df):
     rows = []
 
@@ -29,7 +29,7 @@ def build_failure_summary(results, wrong_revenue, df):
             failure_rate
         ])
 
-    # Custom rule total_revenue
+    # regla personalizada total_revenue
     wrong_count = len(wrong_revenue)
     total_rows = len(df)
     failure_rate_revenue = round((wrong_count / total_rows) * 100, 2)
@@ -55,6 +55,7 @@ def build_failure_summary(results, wrong_revenue, df):
     return summary_df
 
 def run_input_validation(context, batch_request, df):
+
     # Nombre de la expectation suite
     suite_name = "raw_data_validation_suite"
 
@@ -178,7 +179,7 @@ def run_input_validation(context, batch_request, df):
     print("\n- Data Docs generated -.")
     print("Input validation completed.")
 
-   # Failure rate summary PDF
+   # tabla resumen de tasa de fallos PDF
     summary_df = build_failure_summary(validation_results, wrong_revenue, df)
 
     fig, ax = plt.subplots(figsize=(12, 4))
@@ -191,8 +192,8 @@ def run_input_validation(context, batch_request, df):
 
     plt.savefig("reports/failure_rate_summary.pdf", bbox_inches="tight")
     plt.close()
-    
-    # DQ Score RAW
+
+    # DQ puntaje RAW
     total_expectations = validation_results["statistics"]["evaluated_expectations"]
     successful_expectations = validation_results["statistics"]["successful_expectations"]
 

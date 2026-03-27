@@ -3,12 +3,14 @@ import great_expectations as gx
 
 # Cargamos el dataset
 def extract_data():
+
     # Leemos el archivo CSV desde la carpeta raw
     df = pd.read_csv("Data/raw/retail_etl_dataset.csv")
     return df
 
 # Funcion auxiliar para detectar formato de fecha
 def detect_date_format(value):
+
     # Si el valor es nulo real de pandas
     if pd.isna(value):
         return "null_like"
@@ -35,7 +37,7 @@ def detect_date_format(value):
     # Cualquier otro formato
     return "other"
 
-# Future dates
+# Fechas futuras
 def count_future_dates(date_series):
     parsed_dates = pd.to_datetime(date_series, errors="coerce")
     future_dates_count = (parsed_dates > pd.Timestamp("2023-12-31")).sum()
@@ -43,91 +45,91 @@ def count_future_dates(date_series):
 
 # Profiling basico
 def basic_profiling(df):
-    # [x] shape
+    # shape
     print("\n- SHAPE -")
     print(df.shape)
 
-    # [x] info
+    # info
     print("\n- INFO -")
     df.info()
 
-    # [x] memory
+    # memoria
     print("\n- MEMORY USAGE -")
     print(df.memory_usage(deep=True))
     print("\nTotal memory usage:")
     print(df.memory_usage(deep=True).sum(), "bytes")
 
-    # [x] missing count
+    # conteo de nulos
     print("\n- MISSING COUNT -")
     print(df.isnull().sum())
 
-    # [x] missing %
+    # porcentaje de nulos
     print("\n- MISSING PERCENTAGE -")
     print(((df.isnull().sum() / len(df)) * 100).round(2))
 
-    # [x] cardinality product
+    # cardinalidad product
     print("\n- CARDINALITY: PRODUCT -")
     print(df["product"].nunique())
 
-    # [x] cardinality country
+    # cardinalidad country
     print("\n- CARDINALITY: COUNTRY -")
     print(df["country"].nunique())
 
-    # [x] product value counts
+    # conteo de valores product
     print("\n- PRODUCT VALUE COUNTS -")
     print(df["product"].value_counts())
 
-    # [x] country value counts
+    # conteo de valores country
     print("\n- COUNTRY VALUE COUNTS -")
     print(df["country"].value_counts())
 
-    # [x] product unique values
+    # valores unicos product
     print("\n- PRODUCT UNIQUE VALUES -")
     print(df["product"].unique())
 
-    # [x] country unique values
+    # valores unicos country
     print("\n- COUNTRY UNIQUE VALUES -")
     print(df["country"].unique())
 
-    # [x] numeric stats
+    # estadisticas numericas
     print("\n- NUMERIC STATS -")
     numeric_stats = df[["quantity", "price", "total_revenue"]].agg(
         ["min", "max", "mean", "median", "std"]
     )
     print(numeric_stats)
 
-    # [x] duplicate invoice_id
+    # invoice_id duplicados
     duplicate_count = df["invoice_id"].duplicated().sum()
     print("\n- DUPLICATE invoice_id -")
     print(duplicate_count)
 
-    # [x] total_revenue check
+    # verificacion total_revenue
     calculated_total = df["quantity"] * df["price"]
     wrong_total_count = (abs(df["total_revenue"] - calculated_total) > 0.01).sum()
     print("\n- total_revenue != quantity * price (±0.01) -")
     print(wrong_total_count)
 
-    # [x] date format distribution
+    # distribucion de formatos de fecha
     df["date_format"] = df["invoice_date"].apply(detect_date_format)
     print("\n- DATE FORMAT DISTRIBUTION -")
     print(df["date_format"].value_counts())
 
-    # [x] null-like dates
+    # fechas tipo null
     null_like_count = (df["date_format"] == "null_like").sum()
     print("\n- NULL-LIKE DATE STRINGS -")
     print(null_like_count)
 
-    # [x] invalid / other date formats
+    # formatos de fecha invalidos
     other_format_count = (df["date_format"] == "other").sum()
     print("\n- OTHER / INVALID DATE FORMATS -")
     print(other_format_count)
 
-    # Future dates
+    # fechas futuras
     future_dates_count = count_future_dates(df["invoice_date"])
     print("\n- FUTURE DATES (> 2023-12-31) -")
     print(future_dates_count)
 
-    # [x] sample invalid date values
+    # muestra de fechas invalidas
     print("\n- SAMPLE INVALID DATE VALUES -")
     print(df[df["date_format"] == "other"]["invoice_date"].head())
 

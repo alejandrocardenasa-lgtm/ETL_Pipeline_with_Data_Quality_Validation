@@ -13,5 +13,5 @@ def load_data(df):
     # Guardamos el DataFrame en un archivo CSV 
     df.to_csv(output_path, index=False)
     
-    print(f"¡Éxito! Datos limpios y transformados guardados en: {output_path}")
+    print(f"¡exito! Datos limpios y transformados guardados en: {output_path}")
     print(f"Total de filas finales: {len(df)}")

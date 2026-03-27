@@ -81,7 +81,7 @@ def run_output_validation(context):
         "DQ Score (%)": [round(dq_raw * 100, 2), round(dq_clean * 100, 2)]
     })
 
-    # Comparison table
+    # tabla de comparacion
     comparison_table = pd.DataFrame({
         "Expectation": [
             "Compound uniqueness (invoice_id, product)",
@@ -149,7 +149,7 @@ def run_output_validation(context):
     os.makedirs("reports", exist_ok=True)   
     with PdfPages("reports/dq_scores.pdf") as pdf:
 
-        # Pagina 1 - DQ Scores
+        # Pagina 1 - DQ puntajes
         fig1, ax1 = plt.subplots(figsize=(6, 2))
         ax1.axis("off")
         ax1.table(
@@ -161,7 +161,7 @@ def run_output_validation(context):
         pdf.savefig(fig1, bbox_inches="tight")
         plt.close()
 
-        # Pagina 2 - Comparison Table
+        # Pagina 2 - tabla de comparacion
         fig2, ax2 = plt.subplots(figsize=(16, 5))
         ax2.axis("off")
         table = ax2.table(
