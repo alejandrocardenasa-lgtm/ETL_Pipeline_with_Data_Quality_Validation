@@ -51,8 +51,6 @@ Este proyecto fue desarrollado y probado con las siguientes versiones:
 
 Se recomienda usar estas mismas versiones para evitar problemas de compatibilidad.
 
----
-
 ## Cómo Ejecutar el Proyecto
 
 ### 1. Clonar el repositorio
