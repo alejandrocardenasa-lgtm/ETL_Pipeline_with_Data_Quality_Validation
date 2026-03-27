@@ -61,6 +61,7 @@ git clone https://github.com/alejandrocardenasa-lgtm/ETL_Pipeline_with_Data_Qual
 
 cd Great_expectations_ETL
 ````
+--- 
 
 ### 2. Crear el entorno virtual
 
