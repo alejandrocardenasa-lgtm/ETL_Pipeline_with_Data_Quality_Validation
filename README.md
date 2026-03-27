@@ -204,3 +204,6 @@ Debe mostrar versión 0.18.21.
 
 ---
 
+# Autor
+
+GonoAlejo
